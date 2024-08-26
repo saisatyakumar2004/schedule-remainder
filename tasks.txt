@@ -1,0 +1,87 @@
+
+contents = {
+    instructions,
+    image_ask_first_1,
+    prompt1,
+    image_dont_do_this_1,
+    prompt2
+    
+}
+
+
+responses = multimodal_model.generate_content(contents,stream=True)
+
+print("[Prompt]")
+print_multimodal_prompt(contents)
+print("\n[Response]")
+for response in responses:
+    print(response.text,end="")
+
+contents = [prompt1, image_ask_first_3,prompt2,image_dont_do_this_3,prompt3]
+
+generation_config = GenerationConfig(
+    temperature=0.0,
+    top_p=0.8,
+    top_k=40,
+    candidate_count=1,
+    max_output_tokens=2048
+)
+
+responses = multimodal_model.generate_content(contents,generation_config=generation_config,stream=True)
+       
+print("[Prompt]")
+print_multimodal_prompt(contents)
+print("\n[Response]")
+for response in responses:
+    print(response.text,end="")
+
+contents = [prompt,video]
+
+
+responses =multimodal_model.generate_content(contents,stream=True)
+"gs://spls/gsp520/google-pixel-8-pro.mp4",
+
+text_metadata_df, image_metadata_df = get_document_metadata(
+   multimodal_model,
+    pdf_folder_path,
+    image_save_dir="images",
+    image_description_prompt=image_description_prompt,
+    embedding_size=1408,
+)
+
+print("\n\n --- Completed processing. ---")
+
+text_metadata_df.head()
+
+from utils.intro_multimodal_rag_utils import (
+    get_similar_text_from_query,
+    print_text_to_text_citation,
+    get_similar_image_from_query,
+    print_text_to_image_citation,
+    get_gemini_response,
+    display_images,
+)
+
+matching_results_chunks_data =get_similar_text_from_query(
+    query,
+    text_metadata_df,
+    column_name="text_embedding_chunk",
+    top_n=3,
+    chunk_text=True,
+)
+
+print_text_to_text_citation(matching_results_chunks_data,print_top=False,chunk_text=True)
+context_text = list()
+
+for key,value in matching_results_chunks_data.items() :  
+    context_text.append(value["chunk_text"])
+
+final_context_text = "\n".join(context_text)
+
+get_gemini_response(
+  text_model,
+    model_input=prompt,
+    stream=True,
+    generation_config=GenerationConfig(temperature=0.2,max_output_tokens=2048),
+    
+)

@@ -1,0 +1,1 @@
+CreateObject("Wscript.Shell").Run "background_notify",0,True
